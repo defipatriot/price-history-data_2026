@@ -60,7 +60,7 @@ const GITHUB_REPO   = process.env.GITHUB_REPO   || 'defipatriot/price-history-da
 const GITHUB_BRANCH = process.env.GITHUB_BRANCH || 'main';
 const YEAR_DIR      = '2026';
 const RUN_MODE      = (process.env.RUN_MODE || 'sample').toLowerCase();
-const DAYS          = process.env.DAYS || 'max';
+const DAYS          = process.env.DAYS || '365'; // keyless API allows up to 365; 'max' (set with a pro key) is rejected keyless and auto-steps down
 const SPACING_MS    = Number(process.env.REQUEST_SPACING_MS || 2500);
 const SCHEMA_VERSION = 1;
 const FORWARD_CADENCE_HOURS = 24;
@@ -129,18 +129,24 @@ function httpGetJson(url, headers = {}) {
 }
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
-async function cgMarketChart(cgId, days, retries = 4) {
+async function cgMarketChart(cgId, days) {
     const headers = CG_KEY ? { [CG_KEY_HEADER]: CG_KEY } : {};
-    const url = `${CG_BASE}/coins/${encodeURIComponent(cgId)}/market_chart?vs_currency=usd&days=${encodeURIComponent(days)}`;
+    // The keyless/demo tiers REJECT overly-large ranges (HTTP 401, error_code
+    // 10012 "exceeds the allowed time range") — keyless allows ~365 days, not
+    // 'max'. So try the requested window, then step down until one is accepted.
+    const ladder = [...new Set([String(days), '365', '180', '90'])];
     let lastErr;
-    for (let attempt = 1; attempt <= retries; attempt++) {
-        try { return await httpGetJson(url, headers); }
-        catch (e) {
-            lastErr = e;
-            // 429 = rate limit → back off harder; 404 = no such id → don't retry
-            if (/HTTP 404/.test(e.message)) throw e;
-            const backoff = /HTTP 429/.test(e.message) ? 15000 * attempt : 2000 * attempt;
-            if (attempt < retries) await sleep(backoff);
+    for (const w of ladder) {
+        const url = `${CG_BASE}/coins/${encodeURIComponent(cgId)}/market_chart?vs_currency=usd&days=${encodeURIComponent(w)}`;
+        for (let attempt = 1; attempt <= 4; attempt++) {
+            try { return await httpGetJson(url, headers); }
+            catch (e) {
+                lastErr = e;
+                if (/HTTP 404/.test(e.message)) throw e;                       // no such id → stop
+                if (/HTTP 401/.test(e.message) || /time range/i.test(e.message) || /10012/.test(e.message)) break; // range too large → next smaller window
+                const backoff = /HTTP 429/.test(e.message) ? 15000 * attempt : 2000 * attempt;
+                if (attempt < 4) await sleep(backoff); else break;
+            }
         }
     }
     throw lastErr;
