@@ -91,7 +91,11 @@ const TOKENS = {
     BNB:    { cg_id: 'binancecoin',         tier: 'high' },
     WBNB:   { cg_id: 'wbnb',                tier: 'high' },
     OSMO:   { cg_id: 'osmosis',             tier: 'high' },
-    STLUNA: { cg_id: 'stride-staked-luna',  tier: 'high' },
+    // EURE = Monerium EURe. CG renamed it: current id 'monerium-eur-money-2'
+    // (since 2026-02-16); older history is under the legacy id below — stitched
+    // when a key gives a long enough window (free tier won't reach it anyway).
+    EURE:   { cg_id: 'monerium-eur-money-2', legacy_cg_id: 'monerium-eur-money', tier: 'high' },
+    STLUNA: { cg_id: 'stride-staked-luna',  tier: 'high', note: 'thin coin — market_chart may 404 without a CoinGecko key' },
     STATOM: { cg_id: 'stride-staked-atom',  tier: 'high' },
     SOLID:  { cg_id: 'solid-2',             tier: 'high' },
     SWTH:   { cg_id: 'switcheo',            tier: 'high' },
@@ -99,15 +103,16 @@ const TOKENS = {
     CAPA:   { cg_id: 'capapult',            tier: 'high' },
     ASTRO:  { cg_id: 'astroport-fi',        tier: 'high' },
 
-    // Tier-2 derivatives — historical USD NOT chain-reconstructable (ratio pruned).
-    // These CG ids are CANDIDATES; the probe confirms whether CG actually has
-    // history. If a candidate returns nothing, it falls through to unavailable[].
-    bLUNA:   { cg_id: 'backbone-labs-staked-luna', tier: 'low',  note: 'LST — CG-direct, doctrine says weak feed; verify' },
-    ampLUNA: { cg_id: null, tier: 'low', candidate_cg_id: 'eris-amplified-luna',  note: 'LST — derived live (LUNA×ratio); ratio pruned historically' },
-    arbLUNA: { cg_id: null, tier: 'low', candidate_cg_id: 'eris-arbitrage-luna',  note: 'LST — derived live; ratio pruned historically' },
-    ampCAPA: { cg_id: null, tier: 'low', note: 'derived live (CAPA×ratio); no CG feed' },
-    ampROAR: { cg_id: null, tier: 'low', note: 'derived live (ROAR×ratio); no CG feed' },
-    xASTRO:  { cg_id: null, tier: 'low', note: 'priced via Astroport ratio, not CG' },
+    // Tier-2 derivatives. These three CG ids are CONFIRMED working (probe
+    // 2026-06-15) — kept low-confidence per PRICING-DOCTRINE (small-cap CG feed).
+    bLUNA:   { cg_id: 'backbone-labs-staked-luna', tier: 'low', note: 'LST — CG-direct; doctrine says weak feed' },
+    ampLUNA: { cg_id: 'eris-amplified-luna',       tier: 'low', note: 'LST — CG-direct confirmed; live price is LUNA×ratio' },
+    arbLUNA: { cg_id: 'eris-arbitrage-luna',       tier: 'low', note: 'LST — CG-direct confirmed; live price is LUNA×ratio' },
+    // No CG feed — historical USD only reconstructable via base×ratio (see the
+    // ratio-history path in the README). Until then: amount-only in the UI.
+    ampCAPA: { cg_id: null, tier: 'low', note: 'no CG feed — derive via CAPA×ratio (ratio-history backfill)' },
+    ampROAR: { cg_id: null, tier: 'low', note: 'no CG feed — derive via ROAR×ratio (ratio-history backfill)' },
+    xASTRO:  { cg_id: null, tier: 'low', note: 'no CG feed — derive via ASTRO×ratio (ratio-history backfill)' },
 };
 
 // ----------------------------------------------------------------------------- http
@@ -159,13 +164,28 @@ function toDailySeries(prices) {
 
 // ----------------------------------------------------------------------------- one token
 async function backfillToken(symbol, cfg, sampleOnly) {
-    const cgId = cfg.cg_id || cfg.candidate_cg_id || null;
+    const cgId = cfg.cg_id || null;
     if (!cgId) return { symbol, ok: false, reason: cfg.note || 'no CoinGecko id — historical USD unavailable' };
     try {
         const days = sampleOnly ? '90' : DAYS;
         const res = await cgMarketChart(cgId, days);
-        const series = toDailySeries(res?.prices);
-        if (!series.length) return { symbol, ok: false, reason: `CoinGecko id "${cgId}" returned no price history` };
+        let series = toDailySeries(res?.prices);
+
+        // Stitch older history from a legacy id (e.g. EURE's pre-rename id), if any
+        // and if not in sample mode. Legacy points fill ONLY dates the current id
+        // doesn't already cover (current id wins on overlap).
+        if (!sampleOnly && cfg.legacy_cg_id) {
+            try {
+                const legacy = await cgMarketChart(cfg.legacy_cg_id, days);
+                const legacySeries = toDailySeries(legacy?.prices);
+                if (legacySeries.length) {
+                    const have = new Set(series.map(p => p[0]));
+                    series = [...legacySeries.filter(p => !have.has(p[0])), ...series].sort((a, b) => a[0].localeCompare(b[0]));
+                }
+            } catch { /* legacy is best-effort */ }
+        }
+
+        if (!series.length) return { symbol, ok: false, reason: `CoinGecko id "${cgId}" returned no daily price history (thin coin or tier limit — a CoinGecko key may unlock it)` };
         return {
             symbol, ok: true, cg_id: cgId, confidence: cfg.tier === 'high' ? 'high' : 'low',
             tier_note: cfg.note || undefined,
@@ -173,7 +193,9 @@ async function backfillToken(symbol, cfg, sampleOnly) {
             point_count: series.length, points: sampleOnly ? series.slice(-5) : series,
         };
     } catch (e) {
-        const reason = /HTTP 404/.test(e.message) ? `CoinGecko has no coin id "${cgId}"` : `fetch failed: ${e.message}`;
+        const reason = /HTTP 404/.test(e.message)
+            ? `CoinGecko has no market_chart for id "${cgId}" (wrong id, or no history on this API tier — try a CoinGecko key)`
+            : `fetch failed: ${e.message}`;
         return { symbol, ok: false, reason };
     }
 }
