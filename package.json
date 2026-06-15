@@ -1,0 +1,11 @@
+{
+  "name": "price-history-backfill",
+  "version": "1.0.0",
+  "description": "One-time daily USD price-history backfill for TLA tokens via CoinGecko (honest coverage: Tier-1 reliable, Tier-2 flagged, no-feed tokens recorded as amount-only)",
+  "main": "price-history-backfill.js",
+  "scripts": {
+    "start": "node price-history-backfill.js",
+    "sample": "RUN_MODE=sample node price-history-backfill.js"
+  },
+  "license": "MIT"
+}
