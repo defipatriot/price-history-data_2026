@@ -16,9 +16,9 @@ on:
         default: sample
         options: [sample, full]
       days:
-        description: "History window passed to CoinGecko (max, or a number of days). Public API may cap it."
+        description: "History window. Keyless/demo tiers allow up to 365; use 'max' only with a Pro key (auto-steps down otherwise)."
         type: string
-        default: "max"
+        default: "365"
       request_spacing_ms:
         description: "Delay between CoinGecko calls (ms). Raise if you hit 429s without an API key."
         type: string
