@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "builtAt": "2026-06-15T23:36:31.557Z",
+  "source": "archive-lcd-state",
+  "note": "LST_USD(day) = base_USD(day) × rate(day); join base from daily-prices.json",
+  "archive_lcd": "https://phoenix-lcd.terra.dev",
+  "weeks_requested": 130,
+  "tokens": {
+    "ampCAPA": {
+      "hub": "terra186rpfczl7l2kugdsqqedegl4es4hp624phfc7ddy8my02a4e8lgq5rlx7y",
+      "base": "CAPA",
+      "earliest_date": "2026-06-15",
+      "latest_date": "2026-06-15",
+      "point_count": 1,
+      "granularity": "weekly",
+      "points": [
+        [
+          "2026-06-15",
+          1.1055377425623227
+        ]
+      ]
+    },
+    "ampROAR": {
+      "hub": "terra1vklefn7n6cchn0u962w3gaszr4vf52wjvd4y95t2sydwpmpdtszsqvk9wy",
+      "base": "ROAR",
+      "earliest_date": "2026-06-15",
+      "latest_date": "2026-06-15",
+      "point_count": 1,
+      "granularity": "weekly",
+      "points": [
+        [
+          "2026-06-15",
+          1.1721345964737013
+        ]
+      ]
+    },
+    "ampLUNA": {
+      "hub": "terra10788fkzah89xrdm27zkj5yvhj9x3494lxawzm5qq3vvxcqz2yzaqyd3enk",
+      "base": "LUNA",
+      "earliest_date": "2026-06-15",
+      "latest_date": "2026-06-15",
+      "point_count": 1,
+      "granularity": "weekly",
+      "points": [
+        [
+          "2026-06-15",
+          2.1669919715793333
+        ]
+      ]
+    },
+    "bLUNA": {
+      "hub": "terra1l2nd99yze5fszmhl5svyh5fky9wm4nz4etlgnztfu4e8809gd52q04n3ea",
+      "base": "LUNA",
+      "earliest_date": "2026-06-15",
+      "latest_date": "2026-06-15",
+      "point_count": 1,
+      "granularity": "weekly",
+      "points": [
+        [
+          "2026-06-15",
+          1.7682512244397668
+        ]
+      ]
+    },
+    "arbLUNA": {
+      "hub": "terra1r9gls56glvuc4jedsvc3uwh6vj95mqm9efc7hnweqxa2nlme5cyqxygy5m",
+      "base": "LUNA",
+      "earliest_date": "2026-06-15",
+      "latest_date": "2026-06-15",
+      "point_count": 1,
+      "granularity": "weekly",
+      "points": [
+        [
+          "2026-06-15",
+          2.955940523582211
+        ]
+      ]
+    }
+  },
+  "unavailable": []
+}
