@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "builtAt": "2026-06-15T22:34:38.762Z",
+  "coverage": {
+    "LUNA": {
+      "has_history": true,
+      "cg_id": "terra-luna-2",
+      "confidence": "high",
+      "earliest": "2025-06-16",
+      "latest": "2026-06-15",
+      "points": 365
+    },
+    "USDC": {
+      "has_history": true,
+      "cg_id": "usd-coin",
+      "confidence": "high",
+      "earliest": "2025-06-16",
+      "latest": "2026-06-15",
+      "points": 365
+    },
+    "USDT": {
+      "has_history": true,
+      "cg_id": "tether",
+      "confidence": "high",
+      "earliest": "2025-06-16",
+      "latest": "2026-06-15",
+      "points": 365
+    },
+    "WBTC": {
+      "has_history": true,
+      "cg_id": "wrapped-bitcoin",
+      "confidence": "high",
+      "earliest": "2025-06-16",
+      "latest": "2026-06-15",
+      "points": 365
+    },
+    "PAXG": {
+      "has_history": true,
+      "cg_id": "pax-gold",
+      "confidence": "high",
+      "earliest": "2025-06-16",
+      "latest": "2026-06-15",
+      "points": 365
+    },
+    "EURE": {
+      "has_history": true,
+      "cg_id": "monerium-eur-money-2",
+      "confidence": "high",
+      "earliest": "2025-06-16",
+      "latest": "2026-06-15",
+      "points": 365
+    },
+    "INJ": {
+      "has_history": true,
+      "cg_id": "injective-protocol",
+      "confidence": "high",
+      "earliest": "2025-06-16",
+      "latest": "2026-06-15",
+      "points": 365
+    },
+    "ATOM": {
+      "has_history": true,
+      "cg_id": "cosmos",
+      "confidence": "high",
+      "earliest": "2025-06-16",
+      "latest": "2026-06-15",
+      "points": 365
+    },
+    "ETH": {
+      "has_history": true,
+      "cg_id": "ethereum",
+      "confidence": "high",
+      "earliest": "2025-06-16",
+      "latest": "2026-06-15",
+      "points": 365
+    },
+    "WETH": {
+      "has_history": true,
+      "cg_id": "ethereum",
+      "confidence": "high",
+      "earliest": "2025-06-16",
+      "latest": "2026-06-15",
+      "points": 365
+    },
+    "WSTETH": {
+      "has_history": true,
+      "cg_id": "wrapped-steth",
+      "confidence": "high",
+      "earliest": "2025-06-16",
+      "latest": "2026-06-15",
+      "points": 365
+    },
+    "BNB": {
+      "has_history": true,
+      "cg_id": "binancecoin",
+      "confidence": "high",
+      "earliest": "2025-06-16",
+      "latest": "2026-06-15",
+      "points": 365
+    },
+    "WBNB": {
+      "has_history": true,
+      "cg_id": "wbnb",
+      "confidence": "high",
+      "earliest": "2025-06-16",
+      "latest": "2026-06-15",
+      "points": 365
+    },
+    "OSMO": {
+      "has_history": true,
+      "cg_id": "osmosis",
+      "confidence": "high",
+      "earliest": "2025-06-16",
+      "latest": "2026-06-15",
+      "points": 365
+    },
+    "STLUNA": {
+      "has_history": false,
+      "reason": "CoinGecko has no market_chart for id \"stride-staked-luna\" (wrong id, or no history on this API tier — try a CoinGecko key)"
+    },
+    "STATOM": {
+      "has_history": true,
+      "cg_id": "stride-staked-atom",
+      "confidence": "high",
+      "earliest": "2025-06-16",
+      "latest": "2026-06-15",
+      "points": 365
+    },
+    "SOLID": {
+      "has_history": true,
+      "cg_id": "solid-2",
+      "confidence": "high",
+      "earliest": "2025-09-05",
+      "latest": "2026-06-15",
+      "points": 284
+    },
+    "SWTH": {
+      "has_history": true,
+      "cg_id": "switcheo",
+      "confidence": "high",
+      "earliest": "2025-06-16",
+      "latest": "2026-06-15",
+      "points": 365
+    },
+    "ROAR": {
+      "has_history": true,
+      "cg_id": "lion-dao",
+      "confidence": "high",
+      "earliest": "2025-06-17",
+      "latest": "2026-06-15",
+      "points": 349
+    },
+    "CAPA": {
+      "has_history": true,
+      "cg_id": "capapult",
+      "confidence": "high",
+      "earliest": "2025-08-28",
+      "latest": "2026-06-15",
+      "points": 292
+    },
+    "ASTRO": {
+      "has_history": true,
+      "cg_id": "astroport-fi",
+      "confidence": "high",
+      "earliest": "2025-06-16",
+      "latest": "2026-06-15",
+      "points": 365
+    },
+    "bLUNA": {
+      "has_history": true,
+      "cg_id": "backbone-labs-staked-luna",
+      "confidence": "low",
+      "earliest": "2025-09-11",
+      "latest": "2026-06-15",
+      "points": 252
+    },
+    "ampLUNA": {
+      "has_history": true,
+      "cg_id": "eris-amplified-luna",
+      "confidence": "low",
+      "earliest": "2025-09-05",
+      "latest": "2026-06-15",
+      "points": 284
+    },
+    "arbLUNA": {
+      "has_history": true,
+      "cg_id": "eris-arbitrage-luna",
+      "confidence": "low",
+      "earliest": "2025-10-06",
+      "latest": "2026-06-15",
+      "points": 247
+    },
+    "ampCAPA": {
+      "has_history": false,
+      "reason": "no CG feed — derive via CAPA×ratio (ratio-history backfill)"
+    },
+    "ampROAR": {
+      "has_history": false,
+      "reason": "no CG feed — derive via ROAR×ratio (ratio-history backfill)"
+    },
+    "xASTRO": {
+      "has_history": false,
+      "reason": "no CG feed — derive via ASTRO×ratio (ratio-history backfill)"
+    }
+  }
+}
