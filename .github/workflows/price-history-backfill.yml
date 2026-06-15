@@ -1,1 +1,65 @@
-PLace
+name: Price History Backfill (one-time)
+
+# Manual-only one-shot. Pulls daily USD price history from CoinGecko for every
+# TLA token CoinGecko can serve (Tier-1 deep assets reliably; Tier-2 LSTs flagged
+# low-confidence; tokens with no CG feed are recorded as "amount-only" — no fake
+# numbers). Run RUN_MODE=sample first to see coverage, then full to publish.
+# This workflow + price-history-backfill.js + package.json live in the DATA repo
+# (defipatriot/price-history-data_2026).
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "sample = dry-run (prints per-token coverage, writes nothing) | full = write data"
+        type: choice
+        default: sample
+        options: [sample, full]
+      days:
+        description: "History window passed to CoinGecko (max, or a number of days). Public API may cap it."
+        type: string
+        default: "max"
+      request_spacing_ms:
+        description: "Delay between CoinGecko calls (ms). Raise if you hit 429s without an API key."
+        type: string
+        default: "2500"
+      coingecko_pro:
+        description: "Set true ONLY if the COINGECKO_API_KEY secret is a Pro key (else it's treated as a demo key)"
+        type: choice
+        default: "false"
+        options: ["false", "true"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: price-history-backfill
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout (gets the backfill script in this repo)
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run price history backfill
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPO: ${{ github.repository }}
+          GITHUB_BRANCH: ${{ github.ref_name }}
+          RUN_MODE: ${{ inputs.mode }}
+          DAYS: ${{ inputs.days }}
+          REQUEST_SPACING_MS: ${{ inputs.request_spacing_ms }}
+          COINGECKO_PRO: ${{ inputs.coingecko_pro }}
+          # Optional: add a CoinGecko key as a repo secret named COINGECKO_API_KEY
+          # (Settings → Secrets and variables → Actions). Raises rate limits and,
+          # with a paid key, the available history window. Works without one too.
+          COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
+        run: node price-history-backfill.js
