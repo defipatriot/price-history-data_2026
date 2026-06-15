@@ -1,0 +1,58 @@
+name: Ratio History Backfill (one-time)
+
+# Reads each LST/amp hub's {state}.exchange_rate at PAST block heights on an
+# ARCHIVE LCD (no accounting replay) → weekly ratio series for ampCAPA, ampROAR
+# (+ optional LUNA LSTs). Commit this + ratio-history-backfill.js to
+# price-history-data_2026, then:
+#   1) run mode=sample FIRST — confirms the archive endpoint serves historical
+#      reads (ampCAPA rate must DIFFER across heights). If it doesn't, set
+#      archive_lcd to a real archive LCD and re-sample.
+#   2) run mode=full — publishes 2026/data/ratio-history.json.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "sample (validate archive, write nothing) | full (build + publish)"
+        type: choice
+        options: [sample, full]
+        default: sample
+      archive_lcd:
+        description: "ARCHIVE LCD honoring x-cosmos-block-height (must retain history)"
+        type: string
+        default: "https://phoenix-lcd.terra.dev"
+      archive_lcd_fallback:
+        description: "Fallback LCD"
+        type: string
+        default: "https://terra-lcd.publicnode.com"
+      weeks:
+        description: "Weeks of history to attempt (capped by the archive's horizon)"
+        type: string
+        default: "130"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ratio-history-backfill
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run ratio history backfill
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPO: ${{ github.repository }}
+          GITHUB_BRANCH: ${{ github.ref_name }}
+          RUN_MODE: ${{ inputs.mode }}
+          ARCHIVE_LCD: ${{ inputs.archive_lcd }}
+          ARCHIVE_LCD_FALLBACK: ${{ inputs.archive_lcd_fallback }}
+          WEEKS: ${{ inputs.weeks }}
+        run: node ratio-history-backfill.js
