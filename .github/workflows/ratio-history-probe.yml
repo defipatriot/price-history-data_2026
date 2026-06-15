@@ -1,0 +1,37 @@
+name: Ratio History Probe (discovery)
+
+# Manual-only discovery run. Writes nothing — it just prints, per LST/compounder,
+# how to read its exchange rate now and which tx action changes it over time.
+# Commit this + ratio-history-probe.js to a repo (e.g. price-history-data_2026),
+# run it from the Actions tab, and paste the log back so the real ratio backfill
+# can be built from confirmed shapes.
+
+on:
+  workflow_dispatch:
+    inputs:
+      lcd_primary:
+        description: "Primary LCD endpoint"
+        type: string
+        default: "https://terra-lcd.publicnode.com"
+      lcd_fallback:
+        description: "Fallback LCD endpoint"
+        type: string
+        default: "https://terra-rest.publicnode.com"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run ratio probe
+        env:
+          LCD_PRIMARY: ${{ inputs.lcd_primary }}
+          LCD_FALLBACK: ${{ inputs.lcd_fallback }}
+        run: node ratio-history-probe.js
