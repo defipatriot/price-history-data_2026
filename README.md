@@ -48,29 +48,29 @@ unlocks the thin coins — it's the single biggest improvement here.
    → name `COINGECKO_API_KEY`, value = the key.
 3. Re-run the Action (`mode = full`). Leave `coingecko_pro` = `false` (it's a demo key).
 
-For history older than a year (toward genesis), you'd need a paid CoinGecko plan
-**or** the ratio-history path below.
+For history older than a year (toward genesis), you'd need a paid CoinGecko plan.
 
-## The Tier-2 / no-feed tokens (ampCAPA, ampROAR, xASTRO) — the ratio path
+## The Tier-2 / no-feed tokens (ampCAPA, ampROAR, xASTRO) — RESOLVED elsewhere
 
-Three tokens have no CoinGecko feed at all. Their live price is `base × on-chain
-ratio` (PRICING-DOCTRINE), and the chain prunes the historical ratio — so there's
-no shortcut to their past USD. The way to recover it (Camron's idea, and it's the
-right one):
+Three tokens have no CoinGecko feed. Their USD is `base × on-chain ratio`
+(PRICING-DOCTRINE). The ratio history is **NOT built in this repo** — that work
+is done, and it lives in the `network-and-prices` cron, not here.
 
-**Reconstruct the daily exchange-rate from the tx log**, then compute
-`LST_USD(day) = base_USD(day) × ratio(day)` using the base series we already have
-(CAPA, ROAR, ASTRO are all priced here). The ratio steps up on each Eris hub
-harvest/compound tx, so a `ratio-history-backfill` can `tx_search` each LST's hub
-for those events and build a daily ratio series — the same tx-log backfill pattern
-as the vote/lock job. This also extends the LUNA-LSTs (ampLUNA/arbLUNA/bLUNA)
-beyond CoinGecko's window, all the way to genesis.
+What happened (2026-06-15): we surveyed every reachable Terra phoenix-1 archive
+node (TFL `rpc-terra.tfl.foundation` / `phoenix-rpc.terra.dev`, publicnode,
+polkachu) to read each hub's `{state}.exchange_rate` at past heights — **none
+serve historical state** (all pruned or dead). The tx-log reconstruction idea was
+also rejected: only arbLUNA emits `exchange_rate` in-event; the amp hubs emit only
+deltas, so it would need a fragile accounting replay. So the ratio path became
+**forward-capture**: `network-and-prices` already queries all 6 LST rates hourly
+and now appends them to `network-and-prices-data_2026/data/ratio-history.json`
+each end-of-day, and a one-time consolidator recovered history from existing daily
+archives. The UI computes `LST_USD(day) = base_USD(day) × rate(day)` by joining
+that file against `daily-prices.json` here.
 
-That's a separate, focused build (it needs a probe to confirm each hub's address +
-rate-event shape first — exactly how the vote/lock keys were nailed down). Until
-it's built, these tokens stay in `unavailable[]` and the UI shows amount-only.
-Note this is a **completeness** follow-up: the assets that dominate Portfolio
-Tracker P&L (LUNA, the LUNA-LSTs, USDC, ATOM, …) are already covered above.
+**Cleanup note:** the dead exploration scripts `ratio-history-backfill.*` and
+`ratio-history-probe.*` may still be sitting in this repo — they're orphans (the
+working solution is in network-and-prices) and are safe to delete.
 
 ## Run it (Actions tab)
 
@@ -87,6 +87,10 @@ there is the natural forward path. Re-running this Action also tops up the serie
 (it overwrites with the latest full pull).
 
 ## Recent changes
+- **1.0.2** (2026-06-15) — ratio path RESOLVED: no Terra archive node exists, so
+  ampCAPA/ampROAR/xASTRO ratio history is forward-capture in `network-and-prices`
+  (not this repo). Stale "ratio-history-backfill below" section corrected; flagged
+  the dead `ratio-history-backfill.*` / `ratio-history-probe.*` orphans for removal.
 - **1.0.1** (2026-06-15) — after the first sample run: EURE id fixed to
   `monerium-eur-money-2` (+ legacy `monerium-eur-money` stitched for older history);
   confirmed working LST ids promoted (ampLUNA `eris-amplified-luna`, arbLUNA
