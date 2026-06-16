@@ -1,30 +1,29 @@
 name: Ratio History Backfill (one-time)
 
 # Reads each LST/amp hub's {state}.exchange_rate at PAST block heights on an
-# ARCHIVE LCD (no accounting replay) → weekly ratio series for ampCAPA, ampROAR
-# (+ optional LUNA LSTs). Commit this + ratio-history-backfill.js to
-# price-history-data_2026, then:
-#   1) run mode=sample FIRST — confirms the archive endpoint serves historical
-#      reads (ampCAPA rate must DIFFER across heights). If it doesn't, set
-#      archive_lcd to a real archive LCD and re-sample.
-#   2) run mode=full — publishes 2026/data/ratio-history.json.
+# ARCHIVE node → weekly ratio series for ampCAPA, ampROAR (+ optional LUNA LSTs).
+# Commit this + ratio-history-backfill.js to price-history-data_2026, then:
+#   1) run mode=survey FIRST — tests candidate archive endpoints (RPC abci_query
+#      + LCD header) and prints which one serves historical state. Writes nothing.
+#   2) run mode=full with archive_method + archive_endpoint set to the survey
+#      WINNER — publishes 2026/data/ratio-history.json.
 
 on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "sample (validate archive, write nothing) | full (build + publish)"
+        description: "survey (find a working archive endpoint, write nothing) | full (build + publish)"
         type: choice
-        options: [sample, full]
-        default: sample
-      archive_lcd:
-        description: "ARCHIVE LCD honoring x-cosmos-block-height (must retain history)"
+        options: [survey, full]
+        default: survey
+      archive_method:
+        description: "full only: rpc-abci | lcd-header (use the survey WINNER)"
         type: string
-        default: "https://phoenix-lcd.terra.dev"
-      archive_lcd_fallback:
-        description: "Fallback LCD"
+        default: ""
+      archive_endpoint:
+        description: "full only: the archive endpoint URL (use the survey WINNER)"
         type: string
-        default: "https://terra-lcd.publicnode.com"
+        default: ""
       weeks:
         description: "Weeks of history to attempt (capped by the archive's horizon)"
         type: string
@@ -52,7 +51,7 @@ jobs:
           GITHUB_REPO: ${{ github.repository }}
           GITHUB_BRANCH: ${{ github.ref_name }}
           RUN_MODE: ${{ inputs.mode }}
-          ARCHIVE_LCD: ${{ inputs.archive_lcd }}
-          ARCHIVE_LCD_FALLBACK: ${{ inputs.archive_lcd_fallback }}
+          ARCHIVE_METHOD: ${{ inputs.archive_method }}
+          ARCHIVE_ENDPOINT: ${{ inputs.archive_endpoint }}
           WEEKS: ${{ inputs.weeks }}
         run: node ratio-history-backfill.js
